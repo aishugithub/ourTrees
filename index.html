@@ -4,51 +4,73 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Leaf Recognizer</title>
+  <!-- 1. Load TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
+  <!-- 2. Load Teachable Machine Image library -->
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    body { font-family: sans-serif; text-align: center; padding: 20px; background: #f8ffe5;}
     canvas { max-width: 100%; border-radius: 12px; }
     #result { margin-top: 20px; font-size: 1.5em; }
-    button { margin-top: 10px; padding: 10px 20px; font-size: 1em; }
+    button { margin-top: 10px; padding: 10px 20px; font-size: 1em; cursor: pointer; border-radius: 8px; border: none; background: #6dd47e; color: #fff;}
+    button:active { background: #76b947; }
+    #webcam-container { display: inline-block; border-radius: 15px; overflow: hidden; box-shadow: 0 0 20px #c7ffd8; }
   </style>
 </head>
 <body>
   <h1>Tree Leaf Identifier</h1>
   <div id="webcam-container"></div>
   <br />
-  <button onclick="captureAndPredict()">Identify Tree</button>
+  <button id="predictBtn">Identify Tree</button>
   <p id="result"></p>
 
   <script>
-    const URL = "./model/"; // Folder where your model files are
-    let model, webcam, labelContainer, maxPredictions;
+    const MODEL_URL = "./model/"; // Folder where your model files are
+    let model, webcam, maxPredictions;
 
+    // Initialize the webcam and model
     async function init() {
-      const modelURL = URL + "model.json";
-      const metadataURL = URL + "metadata.json";
+      try {
+        const modelURL = MODEL_URL + "model.json";
+        const metadataURL = MODEL_URL + "metadata.json";
 
-      model = await tmImage.load(modelURL, metadataURL);
-      maxPredictions = model.getTotalClasses();
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
 
-      webcam = new tmImage.Webcam(300, 225, true);
-      await webcam.setup();
-      await webcam.play();
-      window.requestAnimationFrame(loop);
+        webcam = new tmImage.Webcam(300, 225, true); // width, height, flip
+        await webcam.setup(); // Request access to the webcam
+        await webcam.play();
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
 
-      document.getElementById("webcam-container").appendChild(webcam.canvas);
+        window.requestAnimationFrame(loop);
+      } catch (err) {
+        document.getElementById("result").innerText =
+          "Error initializing webcam or loading model: " + err;
+        console.error(err);
+      }
     }
 
+    // Keep updating the webcam feed
     async function loop() {
-      webcam.update();
-      window.requestAnimationFrame(loop);
+      if (webcam) {
+        webcam.update();
+        window.requestAnimationFrame(loop);
+      }
     }
 
+    // Classify the current frame and redirect
     async function captureAndPredict() {
+      if (!model || !webcam) {
+        document.getElementById("result").innerText =
+          "Model or webcam not ready.";
+        return;
+      }
       const prediction = await model.predict(webcam.canvas);
       prediction.sort((a, b) => b.probability - a.probability);
       const topResult = prediction[0];
 
-      document.getElementById("result").innerText = `Prediction: ${topResult.className} (${(topResult.probability * 100).toFixed(2)}%)`;
+      document.getElementById("result").innerText =
+        `Prediction: ${topResult.className} (${(topResult.probability * 100).toFixed(2)}%)`;
 
       if (topResult.probability > 0.7) {
         const page = `${topResult.className.toLowerCase()}.html`;
@@ -56,7 +78,11 @@
       }
     }
 
-    window.onload = init;
+    // Set up everything when the page loads
+    window.onload = function () {
+      init();
+      document.getElementById('predictBtn').onclick = captureAndPredict;
+    };
   </script>
 </body>
 </html>
