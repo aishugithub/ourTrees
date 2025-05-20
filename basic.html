@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <div id="webcam-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+    <script>
+      async function init() {
+        try {
+          const webcam = new tmImage.Webcam(300, 225, true);
+          await webcam.setup();
+          await webcam.play();
+          document.getElementById("webcam-container").appendChild(webcam.canvas);
+        } catch (e) {
+          alert(e);
+        }
+      }
+      window.onload = init;
+    </script>
+  </body>
+</html>
