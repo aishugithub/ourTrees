@@ -1,1 +1,63 @@
-index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaf Recognizer</title>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    video, canvas { max-width: 100%; border-radius: 12px; }
+    #result { margin-top: 20px; font-size: 1.5em; }
+    button { margin-top: 10px; padding: 10px 20px; font-size: 1em; }
+  </style>
+</head>
+<body>
+  <h1>Tree Leaf Identifier</h1>
+  <video id="webcam" autoplay playsinline width="300" height="225"></video>
+  <br />
+  <button onclick="captureAndPredict()">Identify Tree</button>
+  <p id="result"></p>
+
+  <script>
+    const URL = "./model/"; // Folder where your model files are
+    let model, webcam, labelContainer, maxPredictions;
+
+    async function init() {
+      const modelURL = URL + "model.json";
+      const metadataURL = URL + "metadata.json";
+
+      model = await tmImage.load(modelURL, metadataURL);
+      maxPredictions = model.getTotalClasses();
+
+      webcam = new tmImage.Webcam(300, 225, true);
+      await webcam.setup();
+      await webcam.play();
+      window.requestAnimationFrame(loop);
+
+      document.getElementById("webcam").appendChild(webcam.canvas);
+    }
+
+    async function loop() {
+      webcam.update();
+      window.requestAnimationFrame(loop);
+    }
+
+    async function captureAndPredict() {
+      const prediction = await model.predict(webcam.canvas);
+      prediction.sort((a, b) => b.probability - a.probability);
+      const topResult = prediction[0];
+
+      document.getElementById("result").innerText = `Prediction: ${topResult.className} (${(topResult.probability * 100).toFixed(2)}%)`;
+
+      if (topResult.probability > 0.7) {
+        const page = `${topResult.className.toLowerCase()}.html`;
+        setTimeout(() => window.location.href = page, 2000);
+      }
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
+
