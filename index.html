@@ -7,14 +7,14 @@
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
   <style>
     body { font-family: sans-serif; text-align: center; padding: 20px; }
-    video, canvas { max-width: 100%; border-radius: 12px; }
+    canvas { max-width: 100%; border-radius: 12px; }
     #result { margin-top: 20px; font-size: 1.5em; }
     button { margin-top: 10px; padding: 10px 20px; font-size: 1em; }
   </style>
 </head>
 <body>
   <h1>Tree Leaf Identifier</h1>
-  <video id="webcam" autoplay playsinline width="300" height="225"></video>
+  <div id="webcam-container"></div>
   <br />
   <button onclick="captureAndPredict()">Identify Tree</button>
   <p id="result"></p>
@@ -35,7 +35,7 @@
       await webcam.play();
       window.requestAnimationFrame(loop);
 
-      document.getElementById("webcam").appendChild(webcam.canvas);
+      document.getElementById("webcam-container").appendChild(webcam.canvas);
     }
 
     async function loop() {
@@ -60,4 +60,3 @@
   </script>
 </body>
 </html>
-
