@@ -4,11 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Know Our Trees</title>
-  <!-- 1. Load TensorFlow.js -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
-  <!-- 2. Load Teachable Machine Image library -->
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
-  <style>
+  <style> 
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; background: #f8ffe5;}
     canvas, video { max-width: 100%; border-radius: 12px; }
     #result { margin-top: 20px; font-size: 1.2em; }
@@ -19,7 +17,7 @@
       background: linear-gradient(135deg, #fffbe7 0%, #e0ffe7 100%);
       border: 2px solid #6dd47e;
       border-radius: 14px;
-      padding: 1.2em 1em;  
+      padding: 1.2em 1em;
       margin: 1.5em auto;
       max-width: 500px;
       color: #2e5b3c;
@@ -76,30 +74,52 @@
   </p>
   <h2>A project by <br>Chinmaya Computing Club</h2>
   <div id="webcam-container">
-    <video id="video" width="300" height="225" autoplay playsinline></video>
+    <video id="video" width="640" height="480" autoplay playsinline></video>
   </div>
   <br />
-  <button id="openCameraBtn">Open Rear Camera</button>
+  <div id="cameraButtons">
+    <button id="frontCameraBtn" style="display:none;">Open Front Camera</button>
+    <button id="rearCameraBtn" style="display:none;">Open Rear Camera</button>
+  </div>
   <button id="predictBtn" style="display:none;">Identify Tree</button>
   <p id="result"></p>
 
   <script>
-    const MODEL_URL = "./model/"; // Folder where your model files are
+    const MODEL_URL = "./model/";
     let model, maxPredictions;
     let video = document.getElementById('video');
     let streamStarted = false;
 
-    // Open rear camera using getUserMedia
-    async function openCamera() {
+    // List cameras and show appropriate buttons
+    async function setupCameraButtons() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoInputs = devices.filter(device => device.kind === 'videoinput');
+      if (videoInputs.length === 1) {
+        // Only one camera, show a single button
+        document.getElementById('rearCameraBtn').innerText = "Open Camera";
+        document.getElementById('rearCameraBtn').style.display = '';
+      } else {
+        // Try to show both buttons
+        document.getElementById('frontCameraBtn').style.display = '';
+        document.getElementById('rearCameraBtn').style.display = '';
+      }
+    }
+
+    // Open camera by facing mode
+    async function openCamera(facingMode) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } }
+          video: {
+            facingMode: { ideal: facingMode },
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          }
         });
         video.srcObject = stream;
         await video.play();
         streamStarted = true;
         document.getElementById('predictBtn').style.display = '';
-        document.getElementById('openCameraBtn').style.display = 'none';
+        document.getElementById('cameraButtons').style.display = 'none';
         await loadModel();
       } catch (e) {
         alert("Could not access the camera: " + e);
@@ -131,10 +151,8 @@
       if (confidence > 0.8) {
         document.getElementById("result").innerText =
           `Prediction: ${topResult.className} (${(confidence * 100).toFixed(2)}%)`;
-        // Redirect after 2 seconds
         setTimeout(() => window.location.href = `${topResult.className.toLowerCase()}.html`, 2000);
       } else if (confidence >= 0.7 && confidence <= 0.8) {
-        // Ask user if they want to see the prediction or contribute
         document.getElementById("result").innerHTML = `
           <div class="contribution-message">
             <h3>We're almost sure!</h3>
@@ -175,7 +193,6 @@
           `;
         };
       } else {
-        // Confidence < 70%
         document.getElementById("result").innerHTML = `
           <div class="contribution-message">
             <h3>We couldn't confidently identify this leaf.</h3>
@@ -195,8 +212,12 @@
       }
     }
 
-    document.getElementById('openCameraBtn').onclick = openCamera;
+    document.getElementById('frontCameraBtn').onclick = () => openCamera("user");
+    document.getElementById('rearCameraBtn').onclick = () => openCamera("environment");
     document.getElementById('predictBtn').onclick = captureAndPredict;
+
+    // On load, setup camera buttons
+    window.onload = setupCameraButtons;
   </script>
 </body>
 </html>
