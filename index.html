@@ -10,13 +10,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
   <!-- 3. Force rear camera (must be after teachablemachine-image.min.js) -->
   <script>
-    window.addEventListener('DOMContentLoaded', function() {
-      const origWebcamConstructor = tmImage.Webcam;
-      tmImage.Webcam = function(width, height, flip) {
-        return new origWebcamConstructor(width, height, flip, { facingMode: { exact: "environment" } });
-      };
-    });
-  </script>
+    // Do NOT wrap in DOMContentLoaded!
+    const origWebcamConstructor = tmImage.Webcam;
+    tmImage.Webcam = function(width, height, flip) {
+      return new origWebcamConstructor(width, height, flip, { facingMode: { exact: "environment" } });
+    };
+  </script> 
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; background: #f8ffe5;}
     canvas { max-width: 100%; border-radius: 12px; } 
@@ -83,7 +82,7 @@
   <p style="font-size:1.1em; color:#388e3c; margin-bottom:1.2em;">
     Discover fascinating facts about our trees — simply show a leaf to your camera and let our system identify it for you!
   </p>
-  <h2>A project by Chinmaya Computing Club</h2>
+  <h2>A project by <br>Chinmaya Computing Club</h2>
   <div id="webcam-container"></div>
   <br />
   <button id="predictBtn">Identify Tree</button>
