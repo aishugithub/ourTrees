@@ -8,17 +8,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
   <!-- 2. Load Teachable Machine Image library -->
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
-  <!-- 3. Force rear camera (must be after teachablemachine-image.min.js) -->
-  <script>
-    // Do NOT wrap in DOMContentLoaded!
-    const origWebcamConstructor = tmImage.Webcam;
-    tmImage.Webcam = function(width, height, flip) {
-      return new origWebcamConstructor(width, height, flip, { facingMode: { ideal: "environment" } });
-    };
-  </script> 
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; background: #f8ffe5;}
-    canvas { max-width: 100%; border-radius: 12px; } 
+    canvas, video { max-width: 100%; border-radius: 12px; }
     #result { margin-top: 20px; font-size: 1.2em; }
     button { margin-top: 10px; padding: 10px 20px; font-size: 1em; cursor: pointer; border-radius: 8px; border: none; background: #6dd47e; color: #fff;}
     button:active { background: #76b947; }
@@ -27,7 +19,7 @@
       background: linear-gradient(135deg, #fffbe7 0%, #e0ffe7 100%);
       border: 2px solid #6dd47e;
       border-radius: 14px;
-      padding: 1.2em 1em;
+      padding: 1.2em 1em;  
       margin: 1.5em auto;
       max-width: 500px;
       color: #2e5b3c;
@@ -83,53 +75,55 @@
     Discover fascinating facts about our trees — simply show a leaf to your camera and let our system identify it for you!
   </p>
   <h2>A project by <br>Chinmaya Computing Club</h2>
-  <div id="webcam-container"></div>
+  <div id="webcam-container">
+    <video id="video" width="300" height="225" autoplay playsinline></video>
+  </div>
   <br />
-  <button id="predictBtn">Identify Tree</button>
+  <button id="openCameraBtn">Open Rear Camera</button>
+  <button id="predictBtn" style="display:none;">Identify Tree</button>
   <p id="result"></p>
 
   <script>
     const MODEL_URL = "./model/"; // Folder where your model files are
-    let model, webcam, maxPredictions;
+    let model, maxPredictions;
+    let video = document.getElementById('video');
+    let streamStarted = false;
 
-    // Initialize the webcam and model
-    async function init() {
+    // Open rear camera using getUserMedia
+    async function openCamera() {
       try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } }
+        });
+        video.srcObject = stream;
+        await video.play();
+        streamStarted = true;
+        document.getElementById('predictBtn').style.display = '';
+        document.getElementById('openCameraBtn').style.display = 'none';
+        await loadModel();
+      } catch (e) {
+        alert("Could not access the camera: " + e);
+      }
+    }
+
+    // Load the Teachable Machine model
+    async function loadModel() {
+      if (!model) {
         const modelURL = MODEL_URL + "model.json";
         const metadataURL = MODEL_URL + "metadata.json";
-
         model = await tmImage.load(modelURL, metadataURL);
         maxPredictions = model.getTotalClasses();
-
-        webcam = new tmImage.Webcam(300, 225, true); // width, height, flip
-        await webcam.setup(); // Request access to the webcam
-        await webcam.play();
-        document.getElementById("webcam-container").appendChild(webcam.canvas);
-
-        window.requestAnimationFrame(loop);
-      } catch (err) {
-        document.getElementById("result").innerText =
-          "Error initializing webcam or loading model: " + err;
-        console.error(err);
       }
     }
 
-    // Keep updating the webcam feed
-    async function loop() {
-      if (webcam) {
-        webcam.update();
-        window.requestAnimationFrame(loop);
-      }
-    }
-
-    // Classify the current frame and redirect or show messages
+    // Prediction logic
     async function captureAndPredict() {
-      if (!model || !webcam) {
+      if (!model || !streamStarted) {
         document.getElementById("result").innerText =
-          "Model or webcam not ready.";
+          "Model or camera not ready.";
         return;
       }
-      const prediction = await model.predict(webcam.canvas);
+      const prediction = await model.predict(video);
       prediction.sort((a, b) => b.probability - a.probability);
       const topResult = prediction[0];
       const confidence = topResult.probability;
@@ -201,11 +195,8 @@
       }
     }
 
-    // Set up everything when the page loads
-    window.onload = function () {
-      init();
-      document.getElementById('predictBtn').onclick = captureAndPredict;
-    };
+    document.getElementById('openCameraBtn').onclick = openCamera;
+    document.getElementById('predictBtn').onclick = captureAndPredict;
   </script>
 </body>
 </html>
