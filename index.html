@@ -8,21 +8,74 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
   <!-- 2. Load Teachable Machine Image library -->
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+  <!-- 3. Force rear camera (must be after teachablemachine-image.min.js) -->
   <script>
-    // Force rear camera by setting facingMode to "environment"
-    // This must be set before webcam.setup()
-    const origWebcamConstructor = tmImage.Webcam;
-    tmImage.Webcam = function(width, height, flip) {
-      return new origWebcamConstructor(width, height, flip, { facingMode: { exact: "environment" } });
-    };
+    window.addEventListener('DOMContentLoaded', function() {
+      const origWebcamConstructor = tmImage.Webcam;
+      tmImage.Webcam = function(width, height, flip) {
+        return new origWebcamConstructor(width, height, flip, { facingMode: { exact: "environment" } });
+      };
+    });
   </script>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; background: #f8ffe5;}
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; background: #f8ffe5;}
     canvas { max-width: 100%; border-radius: 12px; }
-    #result { margin-top: 20px; font-size: 1.5em; }
+    #result { margin-top: 20px; font-size: 1.2em; }
     button { margin-top: 10px; padding: 10px 20px; font-size: 1em; cursor: pointer; border-radius: 8px; border: none; background: #6dd47e; color: #fff;}
     button:active { background: #76b947; }
     #webcam-container { display: inline-block; border-radius: 15px; overflow: hidden; box-shadow: 0 0 20px #c7ffd8; }
+    .contribution-message {
+      background: linear-gradient(135deg, #fffbe7 0%, #e0ffe7 100%);
+      border: 2px solid #6dd47e;
+      border-radius: 14px;
+      padding: 1.2em 1em;
+      margin: 1.5em auto;
+      max-width: 500px;
+      color: #2e5b3c;
+      box-shadow: 0 2px 12px rgba(109, 212, 126, 0.08);
+      font-size: 1.1em;
+      text-align: left;
+    }
+    .contribution-message h3 {
+      color: #388e3c;
+      margin-bottom: 0.5em;
+      font-size: 1.2em;
+      text-align: center;
+    }
+    .contribution-message ul {
+      margin: 0.5em 0 0 1.2em;
+      padding: 0;
+    }
+    .contribution-message li {
+      margin-bottom: 0.5em;
+    }
+    .contribution-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      margin-top: 1em;
+    }
+    .contribution-btn {
+      background: #388e3c;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.7em 1.4em;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .contribution-btn:hover {
+      background: #2e5b3c;
+    }
+    @media (max-width: 600px) {
+      .contribution-message {
+        font-size: 1em;
+        padding: 1em 0.5em;
+        max-width: 98vw;
+      }
+      #result { font-size: 1em; }
+    }
   </style>
 </head>
 <body>
@@ -84,25 +137,63 @@
         // Redirect after 2 seconds
         setTimeout(() => window.location.href = `${topResult.className.toLowerCase()}.html`, 2000);
       } else if (confidence >= 0.7 && confidence <= 0.8) {
-        document.getElementById("result").innerHTML =
-          `It might be <b>${topResult.className}</b> (${(confidence * 100).toFixed(2)}%).<br>
-          If you think this is not correct, please help us improve!`;
-      } else {
+        // Ask user if they want to see the prediction or contribute
         document.getElementById("result").innerHTML = `
-          <b>We couldn't confidently identify this leaf.</b><br><br>
-          <span style="font-size:1.1em;">
-            <b>Help us expand our project!</b><br>
-            If you know the name of this tree, please contribute by sending us at least <b>50 different photos</b> of the leaf and the tree.<br>
-            You can also share interesting facts about the tree if you know any.<br><br>
-            <b>How to contribute:</b><br>
-            <ul style="text-align:left; display:inline-block;">
+          <div class="contribution-message">
+            <h3>We're almost sure!</h3>
+            <p>
+              The system thinks this might be <b>${topResult.className}</b> (<b>${(confidence * 100).toFixed(2)}%</b> confidence).
+            </p>
+            <div class="contribution-actions">
+              <button class="contribution-btn" id="showPredictionBtn">Show Prediction</button>
+              <button class="contribution-btn" id="contributeBtn">Contribute</button>
+            </div>
+          </div>
+        `;
+        document.getElementById('showPredictionBtn').onclick = function() {
+          document.getElementById("result").innerHTML = `
+            <div class="contribution-message">
+              <h3>Prediction</h3>
+              <p>
+                This leaf is most likely <b>${topResult.className}</b> (<b>${(confidence * 100).toFixed(2)}%</b> confidence).
+              </p>
+            </div>
+          `;
+        };
+        document.getElementById('contributeBtn').onclick = function() {
+          document.getElementById("result").innerHTML = `
+            <div class="contribution-message">
+              <h3>Help Us Expand Our Project!</h3>
+              <p>
+                If you know the name of this tree, please contribute by sending us at least <b>50 different photos</b> of the leaf and the tree.<br>
+                You can also share interesting facts about the tree if you know any.
+              </p>
+              <ul>
+                <li>Send your images and details via WhatsApp: <b>+91 99625 82224</b></li>
+                <li>Or email us at: <b>aishwarya.chinmaya@gmail.com</b></li>
+                <li>Please mention the name of the tree and any interesting facts you know.</li>
+              </ul>
+              <p style="margin-top:1em;">Your contribution will help us make this project better for everyone!</p>
+            </div>
+          `;
+        };
+      } else {
+        // Confidence < 70%
+        document.getElementById("result").innerHTML = `
+          <div class="contribution-message">
+            <h3>We couldn't confidently identify this leaf.</h3>
+            <p>
+              <b>Help us expand our project!</b><br>
+              If you know the name of this tree, please contribute by sending us at least <b>50 different photos</b> of the leaf and the tree.<br>
+              You can also share interesting facts about the tree if you know any.
+            </p>
+            <ul>
               <li>Send your images and details via WhatsApp: <b>+91 99625 82224</b></li>
               <li>Or email us at: <b>aishwarya.chinmaya@gmail.com</b></li>
               <li>Please mention the name of the tree and any interesting facts you know.</li>
             </ul>
-            <br>
-            Your contribution will help us make this project better for everyone!
-          </span>
+            <p style="margin-top:1em;">Your contribution will help us make this project better for everyone!</p>
+          </div>
         `;
       }
     }
