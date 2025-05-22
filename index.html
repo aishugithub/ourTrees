@@ -57,6 +57,13 @@
     .contribution-btn:hover {
       background: #2e5b3c;
     }
+    #video {
+      width: 100%;
+      max-width: 350px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
     @media (max-width: 600px) {
       .contribution-message {
         font-size: 1em;
@@ -64,6 +71,10 @@
         max-width: 98vw;
       }
       #result { font-size: 1em; }
+      #video {
+        max-width: 98vw;
+        height: auto;
+      }
     }
   </style>
 </head>
@@ -74,7 +85,7 @@
   </p>
   <h2>A project by <br>Chinmaya Computing Club</h2>
   <div id="webcam-container">
-    <video id="video" width="640" height="480" autoplay playsinline></video>
+    <video id="video" width="350" height="262" autoplay playsinline></video>
   </div>
   <br />
   <div id="cameraButtons">
@@ -111,8 +122,8 @@
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { ideal: facingMode },
-            width: { ideal: 640 },
-            height: { ideal: 480 }
+            width: { ideal: 350 },
+            height: { ideal: 262 }
           }
         });
         video.srcObject = stream;
