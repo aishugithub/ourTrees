@@ -13,7 +13,7 @@
     // Do NOT wrap in DOMContentLoaded!
     const origWebcamConstructor = tmImage.Webcam;
     tmImage.Webcam = function(width, height, flip) {
-      return new origWebcamConstructor(width, height, flip, { facingMode: { exact: "environment" } });
+      return new origWebcamConstructor(width, height, flip, { facingMode: { ideal: "environment" } });
     };
   </script> 
   <style>
