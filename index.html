@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Leaf Recognizer</title>
+  <title>Know Our Trees</title>
   <!-- 1. Load TensorFlow.js -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
   <!-- 2. Load Teachable Machine Image library -->
@@ -19,7 +19,7 @@
   </script>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; background: #f8ffe5;}
-    canvas { max-width: 100%; border-radius: 12px; }
+    canvas { max-width: 100%; border-radius: 12px; } 
     #result { margin-top: 20px; font-size: 1.2em; }
     button { margin-top: 10px; padding: 10px 20px; font-size: 1em; cursor: pointer; border-radius: 8px; border: none; background: #6dd47e; color: #fff;}
     button:active { background: #76b947; }
@@ -79,7 +79,11 @@
   </style>
 </head>
 <body>
-  <h1>Tree Leaf Identifier</h1>
+  <h1>Know Our Trees</h1>
+  <p style="font-size:1.1em; color:#388e3c; margin-bottom:1.2em;">
+    Discover fascinating facts about our trees — simply show a leaf to your camera and let our system identify it for you!
+  </p>
+  <h2>A project by Chinmaya Computing Club</h2>
   <div id="webcam-container"></div>
   <br />
   <button id="predictBtn">Identify Tree</button>
