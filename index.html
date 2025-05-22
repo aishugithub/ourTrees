@@ -1,4 +1,13 @@
 <!DOCTYPE html>
+<script>
+  // Force rear camera by setting facingMode to "environment"
+  // This must be set before webcam.setup()
+  // We'll override tmImage.Webcam's constraints
+  const origWebcamConstructor = tmImage.Webcam;
+  tmImage.Webcam = function(width, height, flip) {
+    return new origWebcamConstructor(width, height, flip, { facingMode: { exact: "environment" } });
+  };
+</script>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -58,7 +67,7 @@
       }
     }
 
-    // Classify the current frame and redirect
+    // Classify the current frame and redirect or show messages
     async function captureAndPredict() {
       if (!model || !webcam) {
         document.getElementById("result").innerText =
@@ -68,13 +77,34 @@
       const prediction = await model.predict(webcam.canvas);
       prediction.sort((a, b) => b.probability - a.probability);
       const topResult = prediction[0];
+      const confidence = topResult.probability;
 
-      document.getElementById("result").innerText =
-        `Prediction: ${topResult.className} (${(topResult.probability * 100).toFixed(2)}%)`;
-
-      if (topResult.probability > 0.7) {
-        const page = `${topResult.className.toLowerCase()}.html`;
-        setTimeout(() => window.location.href = page, 2000);
+      if (confidence > 0.8) {
+        document.getElementById("result").innerText =
+          `Prediction: ${topResult.className} (${(confidence * 100).toFixed(2)}%)`;
+        // Redirect after 2 seconds
+        setTimeout(() => window.location.href = `${topResult.className.toLowerCase()}.html`, 2000);
+      } else if (confidence >= 0.7 && confidence <= 0.8) {
+        document.getElementById("result").innerHTML =
+          `It might be <b>${topResult.className}</b> (${(confidence * 100).toFixed(2)}%).<br>
+          If you think this is not correct, please help us improve!`;
+      } else {
+        document.getElementById("result").innerHTML = `
+          <b>We couldn't confidently identify this leaf.</b><br><br>
+          <span style="font-size:1.1em;">
+            <b>Help us expand our project!</b><br>
+            If you know the name of this tree, please contribute by sending us at least <b>50 different photos</b> of the leaf and the tree.<br>
+            You can also share interesting facts about the tree if you know any.<br><br>
+            <b>How to contribute:</b><br>
+            <ul style="text-align:left; display:inline-block;">
+              <li>Send your images and details via WhatsApp: <b>+91 99625 82224</b></li>
+              <li>Or email us at: <b>aishwarya.chinmaya@gmail.com</b></li>
+              <li>Please mention the name of the tree and any interesting facts you know.</li>
+            </ul>
+            <br>
+            Your contribution will help us make this project better for everyone!
+          </span>
+        `;
       }
     }
 
