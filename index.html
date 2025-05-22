@@ -1,13 +1,4 @@
 <!DOCTYPE html>
-<script>
-  // Force rear camera by setting facingMode to "environment"
-  // This must be set before webcam.setup()
-  // We'll override tmImage.Webcam's constraints
-  const origWebcamConstructor = tmImage.Webcam;
-  tmImage.Webcam = function(width, height, flip) {
-    return new origWebcamConstructor(width, height, flip, { facingMode: { exact: "environment" } });
-  };
-</script>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -17,6 +8,14 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
   <!-- 2. Load Teachable Machine Image library -->
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+  <script>
+    // Force rear camera by setting facingMode to "environment"
+    // This must be set before webcam.setup()
+    const origWebcamConstructor = tmImage.Webcam;
+    tmImage.Webcam = function(width, height, flip) {
+      return new origWebcamConstructor(width, height, flip, { facingMode: { exact: "environment" } });
+    };
+  </script>
   <style>
     body { font-family: sans-serif; text-align: center; padding: 20px; background: #f8ffe5;}
     canvas { max-width: 100%; border-radius: 12px; }
