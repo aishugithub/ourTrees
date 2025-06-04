@@ -77,6 +77,14 @@
         max-width: 98vw;
         height: auto;
       }
+      footer {
+        font-size: 0.98em;
+        padding: 1em 0.3em 0.7em 0.3em;
+        border-radius: 10px 10px 0 0;
+      }
+      footer div {
+        word-break: break-word;
+      }
     }
     .main-tamil-title {
       font-family: 'Noto Sans Tamil', Arial, sans-serif;
@@ -94,6 +102,10 @@
       -webkit-background-clip: initial;
       -webkit-text-fill-color: initial;
       background-clip: initial;
+    }
+    footer {
+      width: 100%;
+      box-sizing: border-box;
     }
   </style>
 </head>
@@ -253,5 +265,20 @@
     // On load, setup camera buttons
     window.onload = setupCameraButtons;
   </script>
+
+  <footer style="margin-top:2.5em; padding:1.2em 0 0.7em 0; background: #e6f2e6; border-top: 2px solid #6dd47e; border-radius: 16px 16px 0 0; box-shadow: 0 -2px 12px #b2f2c9;">
+    <div style="font-size:1.08em; color:#228B22; font-weight:500;">
+      <span>Mentor: <b>Smt. Aishwarya S</b></span><br>
+      <span>Team: 
+        <b>Yashaswini</b> (Team Leader), 
+        <b>Tharish</b> (Assistant Team Leader), 
+        <b>Haritha</b>, 
+        <b>Vishvesh</b>
+      </span>
+    </div>
+    <div style="margin-top:0.7em; font-size:0.98em; color:#388e3c;">
+      &copy; 2025 Chinmaya Computing Club. All rights reserved.
+    </div>
+  </footer>
 </body>
 </html>
