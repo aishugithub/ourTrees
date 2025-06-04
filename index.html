@@ -6,6 +6,8 @@
   <title>Know Our Trees</title>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
   <style> 
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; background: #f8ffe5;}
     canvas, video { max-width: 100%; border-radius: 12px; }
@@ -76,14 +78,35 @@
         height: auto;
       }
     }
+    .main-tamil-title {
+      font-family: 'Noto Sans Tamil', Arial, sans-serif;
+      font-size: 2.7em;
+      font-weight: bold;
+      color: #111; /* Black text */
+      text-shadow:
+        0 2px 8px #6dd47e,   /* Green glow */
+        0 1px 0 #fff,        /* Subtle white highlight */
+        0 0px 10px #228B22;  /* Deep green outer glow */
+      letter-spacing: 0.04em;
+      margin-bottom: 0.3em;
+      /* Remove gradient background for solid black text */
+      background: none;
+      -webkit-background-clip: initial;
+      -webkit-text-fill-color: initial;
+      background-clip: initial;
+    }
   </style>
 </head>
 <body>
-  <h1>Know Our Trees</h1>
+  <h1 class="main-tamil-title">மண்ணின் மரங்கள்</h1>
   <p style="font-size:1.1em; color:#388e3c; margin-bottom:1.2em;">
     Discover fascinating facts about our trees — simply show a leaf to your camera and let our system identify it for you!
   </p>
-  <h2>A project by <br>Chinmaya Computing Club</h2>
+  <h2 style="display: flex; align-items: center; justify-content: center; gap: 0.7em;">
+    A project by <br>
+        Chinmaya Computing Club
+        <img src="logo.png" alt="Chinmaya Computing Club Logo" style="height: 38px; vertical-align: middle; border-radius: 8px; box-shadow:0 3px 8px #b2f2c9;">
+  </h2>
   <div id="webcam-container">
     <video id="video" width="350" height="262" autoplay playsinline></video>
   </div>
